@@ -98,32 +98,28 @@
 (defn rint [upper-limit]
   (- (rand-int (* 2 upper-limit)) upper-limit))
 
-(take 40 (repeatedly #(rint 40)))
-
 (defn choose-averaged-colour [pixels w h coord]
   (let [neighbours (get-neighbours coord [0 0] [(dec w) (dec h)])
         colours (get-filled-pixels pixels w neighbours)]
     (if (empty? colours)
       [255 0 0]
-      (modify-colour (average-colours colours) [(rint 10) (rint 10) (rint 10)]))))
+      (modify-colour (average-colours colours) [(rint 40) (rint 40) (rint 40)]))))
 
 (defn- fill-canvas [w h]
-  (println "FILLING CANVAS")
   (let [pixels (transient (create-canvas w h))]
     (doseq [p (choose-order :linear-horizontal w h)]
       (let [coord (index-to-coord w p)]
         (assoc! pixels p (choose-averaged-colour pixels w h coord))))
-    (persistent! pixels))
-  (println "FINISHED CANVAS"))
+    (persistent! pixels)))
 
 (defn setup []
   (smooth)
   (background 100 0 0)
-  (let [art-width 600 art-height 400 pixel-width 1]
+  (let [art-width 60 art-height 40 pixel-width 10]
     (let [art (fill-canvas art-width art-height)]
       (doseq [y (range 0 art-height)]
         (doseq [x (range 0 art-width)]
-          (let [colour (art (index art-width x y))]
+          (let [colour (nth art (coord-to-index art-width [x y]))]
             (fill (colour 0) (colour 1) (colour 2))
             (stroke-weight 0)
             (rect (* pixel-width x) ( * pixel-width y) pixel-width pixel-width)))))))
@@ -135,10 +131,3 @@
     :size [600 400]))
 
 (make)
-
-
-(let [v (transient [0 0 0 0])]
-  (assoc! v 2 3)
-  (println (for [i (range 0 (count v))] (v i)))
-  (persistent! v)
-  )
